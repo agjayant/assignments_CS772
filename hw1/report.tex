@@ -1,0 +1,53 @@
+\documentclass{article}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+
+\geometry{
+a4paper,
+right=20mm,
+left=20mm,
+top=20mm,
+bottom=20mm,	
+}
+
+\begin{document}
+
+\pagenumbering{gobble}
+
+\begin{center}
+\textbf{\huge Homework 1 : CS772} \\
+\vspace{5pt}
+\textit{\Large Jayant Agrawal}         14282
+\end{center}
+
+\section*{Problem 1}
+\textbf{MLE} finds the parameter $\theta$ that maximises the log-likelihood($p(X|\theta)$)
+$$\mathcal{L}(\theta) = log p(X|\theta) = log p(x_1, x_2 ...x_N | \theta)$$
+Since the observations are i.i.d,
+$$log p(x_1, x_2 ...x_n | \theta) = \prod_{n=1}^N p(x_n| \theta)$$
+MLE Estimation,
+$$\theta_{MLE} = argmax_{\theta} \mathcal{L}(\theta) = argmax_{\theta} \sum_{n=1}^N logp(x_n|\theta)$$
+For poisson distribution,
+$$\lambda_{MLE} = argmax_{\lambda} \sum_{n=1}^N logp(x_n|\lambda)$$
+$$\lambda_{MLE} = argmax_{\lambda} \sum_{n=1}^N log\frac{\lambda^{x_n}e^{-\lambda}}{x_n!}$$
+$$\lambda_{MLE} = argmax_{\lambda} \hspace{5pt} log\lambda\sum_{n=1}^Nx_n - N\lambda - \sum_{n=1}^Nlog(x_n!)$$
+Setting the derivative to 0 to find $\lambda_{MLE}$,
+$$\frac{1}{\lambda}\sum_{n=1}^Nx_n - N = 0$$
+$$\mathbf{\lambda_{MLE}} = \frac{1}{N}\sum_{n=1}^Nx_n$$
+\textbf{MAP} finds the parameter $\theta$ that maximises the log posterior probability($p(\theta|X)$)
+$$\mathcal{L}(\theta) = log p(\theta|X) = log\frac{p(X|\theta)p(\theta)}{p(X)} $$
+Since the observations are i.i.d, MAP estimation($\theta_{MAP}$) is given by,
+$$\theta_{MAP} = argmax_{\theta} \mathcal{L}(\theta) = argmax_{\theta}\sum_{n=1}^N\log{p(x_n|\theta)}+ \log{p(\theta)} $$
+For poisson distribution,
+$$\lambda_{MAP} = argmax_{\lambda} \log{\lambda}\sum_{n=1}^Nx_n- N\lambda - \sum_{n=1}^Nlog(x_n!) + \log{\frac{\beta^\alpha}{\tau(\alpha)} \lambda^{\alpha-1} e^{-\beta\lambda}}$$
+Setting the derivative to 0 to find $\lambda_{MAP}$,
+$$\frac{1}{\lambda}\sum_{n=1}^Nx_n - N + \frac{\alpha-1}{\lambda}- \beta= 0$$
+$$\mathbf{\lambda_{MAP}} = \frac{\sum_{n=1}^Nx_n + \alpha-1}{N+\beta}$$
+
+\end{document}1
+
+
