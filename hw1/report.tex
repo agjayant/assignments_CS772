@@ -28,7 +28,7 @@ bottom=20mm,
 \textbf{MLE} finds the parameter $\theta$ that maximises the log-likelihood($p(X|\theta)$)
 $$\mathcal{L}(\theta) = log p(X|\theta) = log p(x_1, x_2 ...x_N | \theta)$$
 Since the observations are i.i.d,
-$$log p(x_1, x_2 ...x_n | \theta) = \prod_{n=1}^N p(x_n| \theta)$$
+$$ p(x_1, x_2 ...x_n | \theta) = \prod_{n=1}^N p(x_n| \theta)$$
 MLE Estimation,
 $$\theta_{MLE} = argmax_{\theta} \mathcal{L}(\theta) = argmax_{\theta} \sum_{n=1}^N logp(x_n|\theta)$$
 For poisson distribution,
