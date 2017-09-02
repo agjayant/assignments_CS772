@@ -78,11 +78,82 @@ $$\text{sgn}(\sigma^2_{N+1}(x_*) - \sigma^2_{N}(x_*)) = \text{sgn}((M_{N}+x_{N+1
 Using the identity given in the problem statement, 
 $$\text{sgn}(\sigma^2_{N+1}(x_*) - \sigma^2_{N}(x_*)) = \text{sgn}(-\frac{(M_N^{-1}x_{N+1})(x_{N+1}^{T} M_N^{-1})}{1+x_{N+1}^TM_N^{-1}x_{N+1}}) $$
 Since $M_N = (\sum_{n=1}^{N}x_nx_{n+1}^T + \frac{\lambda}{\beta
-}I)^{-1}$, therefore, 
+}I)$, is a covariance matrix and thus positive semi-definite. Therefore, 
 $$\text{sgn}(\sigma^2_{N+1}(x_*) - \sigma^2_{N}(x_*)) = -1 $$
 This shows that $\sigma^2_{N+1}(x_*)$ is less than $\sigma^2_{N}(x_*)$, thus proving that the variance decreases on increasing the number of training examples.
 
 \section*{Problem 3}
+\textbf{Case 1: Real Valued} \\
+A suitable distribution in this case will be the gaussian distribution. A gaussian distribution is defined by a mean and a variance. In our case, $p(x_{nd}|y_n=k)$ is,
+$$p(x_{nd}|y_n=k) = N(\mu_{dk}, \Sigma_{dk})$$
+\textbf{MLE} Estimate: \\ \\
+Log Likelihood is given by:
+$$\log{p(D|\theta)} =  \sum_{k=1}^K\sum_{n:y_n=k}p(x_n|\theta_k) + \sum_{n=1}^N\sum_{k=1}^K 1[y_n=k]\log{\pi_k}$$
+where the variables have the same meaning as the slides. For gaussian, 
+$$p(x_n|\theta_k) = \prod_{d=1}^Dp(x_{nd}|y_n=k)$$
+$$p(x_n|\theta_k) = \prod_{d=1}^DN(\mu_{dk}, \Sigma_{dk})$$
+Now, MLE can be done easily, plugging in Log Likelihood expression, differentiating, and equating to zero for $\mu_{dk}$, 
+$$ \mu_{dk} = \frac{1}{N_k}\sum_{n:y_n=k}x_{nd} $$
+$$ \Sigma_{dk} = \frac{1}{N_k}\sum_{n:y_n=k}(x_{nd}-\mu_{dk})^2$$
+where $N_k$ is the number of points with $y_n=k$. Also, MLE estimate for $\pi_k$ is same as that shown in slides,
+$$\pi_k = \frac{N_k}{N} $$
+\textbf{Case 2:Binary Valued} \\
+Bernoulli Distribution will be ideal in this case, since the features are binary valued. This is described by a parameter $p_{dk}$, as,
+$$p(x_{nd}|y_n=k) = p_{dk}^{x_{nd}}(1-p_{dk})^{1-x_{nd}}$$
+Log Likelihood in this case is given as:
+$$\log{p(D|\theta)} =  \sum_{k=1}^K\sum_{n:y_n=k} [x_{nd}\log{p_{dk}} + (1-x_{nd})\log{1-p_{dk}}] + \sum_{n=1}^N\sum_{k=1}^K 1[y_n=k]\log{\pi_k}$$
+Now, for MLE, differentiating and equating to zero for $p_{dk}$,
+$$\sum_{n:y_n=k}[(\frac{x_{nd}}{p_{dk}} - \frac{1-x_{nd}}{1-p_{dk}})] = 0 $$
+$$\sum_{n:y_n=k}[ (x_{nd}-p_{dk})] = 0 $$
+$$ p_{dk} = \frac{1}{N_k} (\sum_{n:y_n=k} x_{nd}) $$
+MLE Estimate for $\pi_k$ is same as for Case 1. \\ \\
+\textbf{Case 3:Discrete Valued} \\
+There can be two choices for this case: Multinoulli and Binomial. MLE estimate for Binomial Distribution is shown here, as the values are sequential integers from 1 to $V$. Binomial Distribution is defined by $p_{dk}$ as,
+$$p(x_{nd}|p_{dk}) = {{V}\choose{x_{nd}}}p_{dk}^{x_{nd}}(1-p_{dk})^{V-x_{nd}} $$
+Log Likelihood in this case is given as:
+$$\log{p(D|\theta)} =  \sum_{k=1}^K\sum_{n:y_n=k} [\log{{{V}\choose{x_{nd}}}}+x_{nd}\log{p_{dk}} + (V-x_{nd})\log{(1-p_{dk})}] + \sum_{n=1}^N\sum_{k=1}^K 1[y_n=k]\log{\pi_k}$$
+Now, for MLE, differentiating and equating to zero for $p_{dk}$,
+$$\sum_{n:y_n=k}[ (\frac{x_{nd}}{p_{dk}} - \frac{V-x_{nd}}{1-p_{dk}})] = 0 $$
+$$\sum_{n:y_n=k}[\sum_{d=1}^D (x_{nd}-Vp_{dk})] = 0 $$
+$$ p_{dk} = \frac{1}{VN_k} (\sum_{n:y_n=k} x_{nd}) $$
+MLE Estimate for $\pi_k$ is same in this case also. \\ \\
+\section*{Problem 4}
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[scale=0.5]{one.png}
+\label{one}
+\caption{k=1}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[scale=0.5]{two.png}
+\label{two}
+\caption{k=2}
+\end{center}
+\end{figure}
+
+\begin{figure}[h!]
+\begin{center}
+\includegraphics[scale=0.5]{three.png}
+\label{three}
+\caption{k=3}
+\end{center}
+\end{figure}
+
+\textbf{Marginal Likelihood: } \\
+\textit k = 1 : Marginal Likelihood = $8.90 \times 10^{-15}$ \\
+\textit k = 2 : Marginal Likelihood = $1.28 \times 10^{-10}$ \\
+\textit k = 3 : Marginal Likelihood = $2.57 \times 10^{-10}$ \\ \\
+Since, marginal likelihood is maximum for $k=3$, thus this model explains the data "best". \\ \\
+\textbf{Additional Training Input: }\\
+Since, the models show highest variance around $x_* = -4$ (there are less number of training data points near $x = -4$), the extra data point should be near -4. \\
+\textbf{Plots:} Mean of Posterior Predictive Distribution \\
+
+
+
+
 
 
 \end{document}
