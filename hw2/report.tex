@@ -4,7 +4,7 @@
 \usepackage{amsmath}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
-
+\usepackage{dsfont}
 
 \geometry{
 a4paper,
@@ -28,7 +28,7 @@ bottom=20mm,
 
 \section*{Problem 1}
 \section*{Problem 2}
-
+\textbf{Regression using Generative Models} \\ \\
 An appropriate choice for $p(x,y)$ is the \textbf{bivariate gaussian distribution}.
 $$p(x,y) = \mathcal{N}(\hspace{2pt} (x,y)\hspace{2pt} | \hspace{2pt} (\mu_x,\mu_y), \Sigma)$$
 where,
@@ -61,6 +61,53 @@ $$p(x,z) = f(\Theta) \times \text{Gaussian}$$
 $$p(x,z) = h(x) \times exp(\theta^T \phi(x) - A(\theta))$$
 This is thus of the form of an exponential family distribution.
 \section*{Problem 4}
+\textbf{Mixture Model for Binary Vectors} \\ \\
+\emph{Bernoulli} Destribution is a distribution over r.v. $x\in\{0,1\}$. Thus, for a binary vector of size $D$, product of Bernoulli is appropriate choice where each feature $x_{nd}$ in every observation $x_n$ is sampled from a Bernoulli. Also, let the cluster/component ID for observation $x_n$ be $z_n$, which is sampled from a \emph{multinoulli} distribution. If $\pi=(\pi_1, \pi_2,..., \pi_k)$, where $\sum_{k=1}^K \pi_k = 1$, then
+$$p(z_n = k | \pi) = \pi_k$$
+Also, given $z_n$, we generate $x_n$ from $k$-th cluster as,
+$$p(x_n|z_n=k) = \prod_{d=1}^D \text{Bernoulli}(x_{nd}, \rho_{kd})$$
+Complete data likelihood ($p(x_n,z_n|\Theta)$) for $x_n$ is,
+$$p(x_n,z_n|\Theta) = p(x_n|z_n, \rho)p(z_n, \pi)$$
+where $\Theta=\{\{\pi\}_{k=1}^K, \{\rho_{dk}\}_{d=1,k=1}^{D,K}\}$ For MAP Estimate, we have to consider $\prod_{n=1}^Np(x_n,z_n|\Theta)p(\Theta)$. Thus, the complete data log-likelihood becomes,
+$$\text{CLL}(\Theta) = \log(\prod_{n=1}^Np(x_n,z_n|\Theta)p(\Theta) )$$
+Choosing \emph{Dirichlet} prior for \{$\pi$\} and \emph{Beta} prior for $\{\rho_{dk}\}$, we derive the following expression for CLL$(\Theta)$, for computing the MAP Estimate,
+$$\text{CLL}(\Theta) = \sum_{n=1}^N \log(\prod_{k=1}^K [p(x_n|z_n=k)p(z_n=k)]^{z_{nk}} ) + \log{p(\pi)} + \log{p(\rho)} $$
+where $z_{nk}$ is one if $x_n$ belongs to the $k$-th cluster, otherwise 0,
+$$\text{CLL}(\Theta) = \sum_{n=1}^N \sum_{k=1}^K z_{nk}[\log{\pi_k}+ \log{\prod_{d=1}^D\text{Bernoulli}(x_{nd}, \rho_{kd})}] + \log{\text{Dirichlet}(\pi; \delta)} + \sum_{k=1}^K \sum_{d=1}^D \log{ \text{Beta}(\rho_{kd}; \alpha, \beta) }$$
+where $\{\delta\}$ and $\{\alpha,\beta\}$ are hyperparameters for Dirichlet and Beta Distributions respectively. \\ \\
+\textbf{E Step} \\
+Here, we assume $\Theta$ is known, and compute expectation for $z_{nk}$, as
+\begin{equation*}
+\begin{split}
+\mathds{E}[z_{nk}] &= p(z_{nk} = 1| x_n)  \\
+ &\propto p(z_{nk} = 1)p(x_n|z_{nk} = 1) \\
+ &= \pi_k \prod_{d=1}^D (\rho_{kd})^{x_{nd}}(1-\rho_{kd})^{1-x_{nd}}  
+ \end{split}
+\end{equation*}
+Normalizing, we get $\mathds{E}[z_{nk}] = \gamma_{nk}$, 
+$$\gamma_{nk} = \frac{\pi_k \prod_{d=1}^D (\rho_{kd})^{x_{nd}}(1-\rho_{kd})^{1-x_{nd}}}{\sum_{l=1}^K\pi_l \prod_{d=1}^D (\rho_{ld})^{x_{nd}}(1-\rho_{ld})^{1-x_{nd}}}$$
+\textbf{M Step} \\
+Using $\mathds{E}[z_{nk}] = \gamma_{nk}$, computed in \emph{E Step}, maximising expected CLL objective wrt $\Theta = \{\pi,\rho\}$ will give us the MAP Estimate,
+$$\mathcal{L} = \sum_{n=1}^N \sum_{k=1}^K \gamma_{nk}[\log{\pi_k}+ \log{\prod_{d=1}^D\text{Bernoulli}(x_{nd}, \rho_{kd})}] + \log{\text{Dirichlet}(\pi; \delta)} + \sum_{k=1}^K \sum_{d=1}^D \log{ \text{Beta}(\rho_{kd}; \alpha, \beta) }$$
+
+$$\mathcal{L} = \sum_{n=1}^N \sum_{k=1}^K \gamma_{nk}[\log{\pi_k}+ \log{\prod_{d=1}^D(\rho_{kd})^{x_{nd}}(1-\rho_{kd})^{1-x_{nd}}}] + \log{A \times \prod_{k=1}^K\pi_k^{\delta_k-1}} + \sum_{k=1}^K \sum_{d=1}^D \log{B \times \rho_{kd}^{\alpha-1}(1-\rho_{kd})^{\beta-1} }$$
+where $A$ and $B$ are some constants. To compute MAP Estimate for $\rho_{kd}$,
+$$\frac{\partial \mathcal{L}}{\partial \rho_{kd}} = 0$$
+Ignoring all the parts which are not a function of $\rho_{dk}$, we get,
+$$\frac{\partial \mathcal{L}}{\partial \rho_{kd}} = \sum_{n=1}^N\gamma_{nk}(\frac{x_{nd}}{\rho_{kd}} - \frac{1-x_{nd}}{1-\rho_{kd}}) + \frac{\alpha-1}{\rho_{kd}} - \frac{\beta-1}{1-\rho_{kd}} = 0$$
+$$\rho_{kd} = \frac{\sum_{n=1}^N\gamma_{nk}x_{nd}+\alpha-1}{N_k+\alpha+\beta-2}$$
+where $N_k = \sum_{n=1}^N\gamma_{nk}$. To compute MAP Estimate for $\pi_k$, we have to use lagrange multiplier, $\lambda$ to incorporate the constraint $\sum_{k=1}^K\pi_k=1$. Ignoring all the parts which do not depend on $\pi_k$, we get the following objective,
+$$\mathcal{L}' = \sum_{n=1}^N \sum_{k=1}^K \gamma_{nk}\log{\pi_k} + \sum_{k=1}^K(\delta_k-1)\log{\pi_k} + \lambda(1-\sum_{k=1}^K\pi_k)$$
+For $\pi_k$,
+$$\frac{\partial \mathcal{L}'}{\partial \pi_{k}} = 0$$
+$$\sum_{n=1}^N\frac{\gamma_{nk}}{\pi_k}+ \frac{\delta_k-1}{\pi_k} -\lambda = 0$$
+$$\pi_k = \frac{\sum_{n=1}^N\gamma_{nk}+\delta_k-1}{\lambda}$$
+For $\lambda$,
+$$\frac{\partial \mathcal{L}'}{\partial \lambda} = 0$$
+$$\frac{1}{\lambda}\sum_{n=1}^N\sum_{k=1}^K \gamma_{nk} = 1$$
+$$\lambda=N$$
+Thus, 
+$$\pi_k = \frac{\sum_{n=1}^N\gamma_{nk}+\delta_k-1}{N}$$
 \section*{Problem 5}
 
 
