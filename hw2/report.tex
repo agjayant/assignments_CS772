@@ -1,0 +1,71 @@
+\documentclass{article}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+
+\geometry{
+a4paper,
+right=20mm,
+left=20mm,
+top=20mm,
+bottom=20mm,	
+}
+
+\begin{document}
+
+\pagenumbering{gobble}
+
+\begin{center}
+\textbf{\huge CS772 : Probabilistic Machine Learning} \\
+\textbf{\huge Homework 2} \\
+\vspace{5pt}
+\textit{\Large Jayant Agrawal} \\
+14282
+\end{center}
+
+\section*{Problem 1}
+\section*{Problem 2}
+
+An appropriate choice for $p(x,y)$ is the \textbf{bivariate gaussian distribution}.
+$$p(x,y) = \mathcal{N}(\hspace{2pt} (x,y)\hspace{2pt} | \hspace{2pt} (\mu_x,\mu_y), \Sigma)$$
+where,
+\[
+\Sigma=
+  \begin{bmatrix}
+    \Sigma_{xx} & \Sigma_{xy}  \\
+    \Sigma_{yx} & \Sigma_{yy} 
+  \end{bmatrix}
+\]
+The parameters to be learned here are: $\mu_x$, $\mu_y$ and $\Sigma$. \\ \\
+Bivariate Gaussian is a reasonable choice since marginals and conditionals of a multivariate gaussian are also gaussian, as we will see next. And it makes even more sense, as the discriminative linear regression model was also based on a gaussian distribution. \\ \\
+Computing the actual distribution of interest, $p(y|x)$ is easy since, conditional distribution of a bivariate gaussian is another gaussian as,
+$$p(y|x) = \mathcal{N}(y|\mu_{y|x}, \Sigma_{y|x})$$
+$$\mu_{y|x} = \mu_y + \Sigma_{yx}\Sigma_{xx}^{-1}(x-\mu_x)$$
+$$\Sigma_{y|x} = \Sigma_{yy} - \Sigma_{yx}\Sigma_{xx}^{-1}\Sigma_{xy}$$
+The parameters to be learned here are: $\mu_x$, $\mu_y$ and $\Sigma$.
+
+\section*{Problem 3}
+The complete data likelihood is given by:
+$$p(x,z) = \prod_{n=1}^Np(x_n,z_n|\Theta)$$
+where,
+$$p(x_n, z_n|\Theta) = p(x_n|z_n)p(z_n)$$	
+$$p(x_n, z_n|\Theta) = \mathcal{N}(x_n|\mu_{z_n}, \Sigma_{z_n})\pi_{z_n}$$	
+Thus, 
+$$p(x,z) = \prod_{n=1}^N\pi_{z_n}\mathcal{N}(x_n|\mu_{z_n}, \Sigma_{z_n})$$
+$$p(x,z) = ( \prod_{n=1}^N\pi_{z_n})(\prod_{n=1}^{N}\mathcal{N}(x_n|\mu_{z_n}, \Sigma_{z_n}))$$
+Since the observations are i.i.d, the product of gaussians is another gaussian, 
+$$p(x,z) = f(\Theta) \times \text{Gaussian}$$
+$$p(x,z) = h(x) \times exp(\theta^T \phi(x) - A(\theta))$$
+This is thus of the form of an exponential family distribution.
+\section*{Problem 4}
+\section*{Problem 5}
+
+
+
+
+\end{document}
+
+
