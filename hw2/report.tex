@@ -104,10 +104,10 @@ $$\sum_{n=1}^N\frac{\gamma_{nk}}{\pi_k}+ \frac{\delta_k-1}{\pi_k} -\lambda = 0$$
 $$\pi_k = \frac{\sum_{n=1}^N\gamma_{nk}+\delta_k-1}{\lambda}$$
 For $\lambda$,
 $$\frac{\partial \mathcal{L}'}{\partial \lambda} = 0$$
-$$\frac{1}{\lambda}\sum_{n=1}^N\sum_{k=1}^K \gamma_{nk} = 1$$
-$$\lambda=N$$
+$$\frac{1}{\lambda}\sum_{n=1}^N\sum_{k=1}^K \gamma_{nk} + \frac{1}{\lambda}\sum_{k=1}^K(\delta_k-1)= 1$$
+$$\lambda=N - K + \sum_{k=1}^K\delta_k$$
 Thus, 
-$$\pi_k = \frac{\sum_{n=1}^N\gamma_{nk}+\delta_k-1}{N}$$
+$$\pi_k = \frac{\sum_{n=1}^N\gamma_{nk}+\delta_k-1}{N - K + \sum_{k=1}^K\delta_k}$$
 \section*{Problem 5}
 
 
