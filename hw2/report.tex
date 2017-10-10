@@ -27,6 +27,17 @@ bottom=20mm,
 \end{center}
 
 \section*{Problem 1}
+\textbf{Constructing Richer Priors \\ \\}
+Posterior $p(\theta|D)$ is given by:
+$$p(\theta|D) = \frac{p(D|\theta)p(\theta)}{p(D)}$$
+The prior is given as:
+$$p(\theta) = \sum_{k=1}^Kp(z=k)p(\theta|z=k)$$
+Since $p(\theta|z=k)$ is conjugate to $p(D|\theta)$ for all $k$. We can write posterior as:
+$$p(\theta|D) = p(D|\theta)\sum_{k=1}^Kp(z=k)p(\theta|z=k)/p(D)$$
+$$ = \sum_{k=1}^K p(z=k)\frac{p(D|\theta)p(\theta|z=k)}{p(D)}$$
+Thus, posterior can be written as a convex combination of conjugate distributions. Also we can further write posterior as:
+$$ = \sum_{k=1}^K p(z=k)p(\theta|D, z=k)$$
+This can be interpreted as a convex combination of $k$ posteriors. Also, this is of the same form as the prior. Thus, we can say that $p(\theta)$ is a conjugate to the likelihood $p(D|\theta)$.
 \section*{Problem 2}
 \textbf{Regression using Generative Models} \\ \\
 An appropriate choice for $p(x,y)$ is the \textbf{bivariate gaussian distribution}.
@@ -46,7 +57,14 @@ $$p(y|x) = \mathcal{N}(y|\mu_{y|x}, \Sigma_{y|x})$$
 $$\mu_{y|x} = \mu_y + \Sigma_{yx}\Sigma_{xx}^{-1}(x-\mu_x)$$
 $$\Sigma_{y|x} = \Sigma_{yy} - \Sigma_{yx}\Sigma_{xx}^{-1}\Sigma_{xy}$$
 The parameters to be learned here are: $\mu_x$, $\mu_y$ and $\Sigma$.
-
+The log likelihood of the model is given by:
+$$\mathcal{L} = \prod_{n=1}^N\mathcal{N}(\hspace{2pt} (x_n,y_n)\hspace{2pt} | \hspace{2pt} (\mu_x,\mu_y), \Sigma)$$
+Since this is a bivariate gaussian, we can intuitively see that $\mu_x^{MLE}$ and $\mu_y^{MLE}$ will be:
+$$\mu_x^{MLE} = \frac{1}{N}\sum_{n=1}^Nx_n$$
+$$\mu_y^{MLE} = \frac{1}{N}\sum_{n=1}^Ny_n$$
+And as we know, the solution for $\Sigma$ will be similar to what we have seen in class (skipping computations):
+$$\Sigma = \frac{1}{N}\sum_{n=1}^N \sum_{n=1}^N (\tilde{x_n}-\tilde{\mu})(\tilde{x_n}-\tilde{\mu})^T$$
+where $\tilde{x_n} = (x_n,y_n)$ and $\tilde{\mu} = (\mu_x, \mu_y)$.
 \section*{Problem 3}
 The complete data likelihood is given by:
 $$p(x,z) = \prod_{n=1}^Np(x_n,z_n|\Theta)$$
@@ -109,10 +127,35 @@ $$\lambda=N - K + \sum_{k=1}^K\delta_k$$
 Thus, 
 $$\pi_k = \frac{\sum_{n=1}^N\gamma_{nk}+\delta_k-1}{N - K + \sum_{k=1}^K\delta_k}$$
 \section*{Problem 5}
-
-
-
-
+\textbf{EM for Hyperparameter Estimation} \\ \\
+Complete Data Likelihood, $p(y,w|X,\lambda, \beta) $, is given by :
+$$p(y,w|X,\lambda, \beta) = p(y|w,X,\beta)p(w|\lambda)$$
+$$p(y,w|X,\lambda, \beta) = \prod_{n=1}^N \mathcal{N}(y_n|w^Tx_n, \beta^{-1})\mathcal{N}(w|0,\lambda^{-1}I)$$
+Complete Data Log-Likelihood is given by :
+$$\log p(y,w|X,\lambda, \beta) = \sum_{n=1}^N \log \mathcal{N}(y_n|w^Tx_n, \beta^{-1})+\log \mathcal{N}(w|0,\lambda^{-1}I)$$
+$$\log p(y,w|X,\lambda, \beta) = \frac{N}{2}\log \beta - \frac{\beta}{2}\sum_{n=1}^N(y_n-w^Tx_n)^2 - \frac{1}{2}\log |\lambda^{-1}I| -\frac{1}{2}\lambda(w^Tw)$$
+Now, since we are using EM and taking expectation wrt w, we have to compute $\mathds{E}[w^T]$ and $\mathds{E}[w^Tw]$, to be able to do MLE for $\lambda$ and $\beta$ on the expected complete data log likelihood. Thus, the EM Algorithm is as follows: \\ \\
+\textbf{E Step} \\ \\
+In this step, posterior of $w$ needs to be computed to compute the two expectations above. Computing posterior:
+$$p(w|X,y,\beta,\lambda) \propto p(w|\lambda)p(y|X,w,\beta)$$
+Using Gaussian properties, we get: (this is exactly similar as done in class, so skipping the computations)
+$$p(w|X,y,\beta,\lambda) = \mathcal{N}(\mu, \Sigma)$$
+$$\mu = (X^TX + \frac{\lambda}{\beta}I_D)^{-1}X^Ty$$ 
+$$\Sigma = (\beta X^TX + \lambda I_D)^{-1}$$
+Therefore, required expectations are given by:
+$$\mathds{E}[w^T] = \mathds{E}[w]^T =\mu^T$$
+$$\mathds{E}[w^Tw] = \mathds{E}[w]^T\mathds{E}[w]+\text{trace}(cov(w)) = \mu^T\mu + trace(\Sigma)$$
+\textbf{M Step} \\ \\
+Expected Complete Data log likelihood is given by:
+$$\mathcal{L} =  \mathds{E}[\log p(y,w|X,\lambda, \beta)] = \frac{N}{2}\log \beta - \frac{\beta}{2}\sum_{n=1}^N(y_n-\mathds{E}[w^T]x_n)^2 - \frac{1}{2}\log |\lambda^{-1}I| -\frac{1}{2}\lambda(\mathds{E}[w^Tw])$$
+For $\beta$, 
+$$\frac{\partial \mathcal{L}}{\partial \beta} = 0$$
+$$\frac{N}{2\beta} - \frac{1}{2}\sum_{n=1}^N(y_n-\mathds{E}[w^T]x_n)^2 = 0$$
+$$\beta = \frac{N}{\sum_{n=1}^N(y_n-\mu^Tx_n)^2}$$
+For $\lambda$,
+$$\frac{\partial \mathcal{L}}{\partial \lambda} = 0$$
+$$\frac{D}{2\lambda} - \frac{\mathds{E}[w^Tw]}{2} = 0$$
+$$\lambda = \frac{D}{ \mu^T\mu + trace(\Sigma)}$$
 \end{document}
 
 
