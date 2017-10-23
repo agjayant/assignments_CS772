@@ -17,7 +17,7 @@ U = gamrnd(a_u,1/b_u,N,K); % NxK matrix, drawn randomly from the prior
 V = gamrnd(a_v,1/b_v,M,K); % MxK matrix, drawn randomly from the prior
 
 % number of iterations (you can play with these in experimentation)
-max_iters = 1000;
+max_iters = 1;
 burnin = 500;
 
 % prepare the training and test data
@@ -29,6 +29,7 @@ burnin = 500;
 % Do an 80/20 split of matrix entries (nonzeros) into training and test data
 num_elem = length(I);
 rp = randperm(num_elem);
+num_nz = num_elem;
 
 % indices of training set entries
 I_train = I(rp(1:round(0.8*num_elem)));
@@ -49,15 +50,45 @@ vals_test = vals(rp(round(0.8*num_nz)+1:end));
 
 for iters=1:max_iters
     
+    
+    eta = zeros(round(0.8*num_nz), K);
+    for i=1:round(0.8*num_nz)
+        eta(i,:) = U(I_train(i),:).*V(J_train(i),:)/(U(I_train(i),:)*V(J_train(i),:)');
+    end
+    
+    X_mnk = mnrnd(vals_train,eta );
+        
     % Sample U using its local conditional posterior
     % Note: wherever possible, try to vectorize the code for more efficiency
     % e.g., instead  of looping over each entry of U, you can draw one 
     %row at a  time
     
+    X_ndk = zeros(N,K);    
+    for i=1:N
+        n_ind = find(I_train == i);
+        X_ndk(i,:) = sum(X_mnk(n_ind,:)) + a_u;
+    end
+    
+    V_dk = repmat(sum(V),N,1) + b_u;
+    V_dk = arrayfun(@(a) 1/a, V_dk);
+    
+    U = gamrnd(X_ndk, V_dk);           
+    
     % Sample V using its local conditional posterior
     % Note: wherever possible, try to vectorize the code for more efficiency
     % e.g., instead  of looping over each entry of V, you can draw one 
     % row at a  time
+    
+    X_dmk = zeros(M,K);    
+    for i=1:M
+        m_ind = find(J_train == i);
+        X_dmk(i,:) = sum(X_mnk(m_ind,:)) + a_v;
+    end
+    
+    U_dk = repmat(sum(U),M,1) + b_v;
+    U_dk = arrayfun(@(a) 1/a, U_dk);
+    
+    V = gamrnd(X_dmk, U_dk); 
     
     % Calculate the reconstructor error (mean absolute error) of training
     % and test entries. You need to do this using two ways: (1) Using the 
@@ -65,15 +96,15 @@ for iters=1:max_iters
     % averaging; the latter only has to be done after the burn-in period
     
     % Approach 1 (using current samples of U and V from this iteration)    
-    mae_train = ???
-    mae_test = ???
+    mae_train = 10
+    mae_test = 10
     fprintf('Done with iteration %d, MAE_train = %f, MAE_test = %f\n',iters,mae_train,mae_test);
     
     % Approach 2 (using Monte Carlo averaging; but only using the
     % post-burnin samples of U and V)
     if iters > burnin
-        mae_train_avg = ???
-        mae_test_avg = ???     
+        mae_train_avg = 10
+        mae_test_avg = 10     
         fprintf('With Posterior Averaging, MAE_train_avg = %f, MAE_test_avg = %f\n',mae_train_avg,mae_test_avg);
     end
 end
