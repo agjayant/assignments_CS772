@@ -17,7 +17,7 @@ U = gamrnd(a_u,1/b_u,N,K); % NxK matrix, drawn randomly from the prior
 V = gamrnd(a_v,1/b_v,M,K); % MxK matrix, drawn randomly from the prior
 
 % number of iterations (you can play with these in experimentation)
-max_iters = 1;
+max_iters = 1000;
 burnin = 500;
 
 % prepare the training and test data
@@ -47,6 +47,12 @@ vals_test = vals(rp(round(0.8*num_nz)+1:end));
 % in each iteration, draw samples of U, V, lambda
 % Note: you may have to draw samples of some additional latent variables
 % (your solution to Problem 1 should tell you what these variables will be)
+
+U_avg = zeros(N,K);
+V_avg = zeros(M,K);
+
+maeF1 = fopen('mae.txt','w');
+maeF2 = fopen('mae_avg.txt','w');
 
 for iters=1:max_iters
     
@@ -95,24 +101,56 @@ for iters=1:max_iters
     % samples of U, V, lambda from this iteration (2) Using Monte Carlo 
     % averaging; the latter only has to be done after the burn-in period
     
-    % Approach 1 (using current samples of U and V from this iteration)    
-    mae_train = 10
-    mae_test = 10
+    % Approach 1 (using current samples of U and V from this iteration) 
+    mae_train = 0 ;
+    for i=1:round(0.8*num_nz)
+        mae_train = mae_train + abs(U(I_train(i),:)*V(J_train(i),:)' - vals_train(i));
+    end
+    mae_train = mae_train/round(0.8*num_nz);
+    
+    mae_test = 0;
+    for i=1:round(0.2*num_nz)
+        mae_test = mae_test + abs(U(I_test(i),:)*V(J_test(i),:)' - vals_test(i));
+    end
+    mae_test = mae_test/round(0.2*num_nz);
     fprintf('Done with iteration %d, MAE_train = %f, MAE_test = %f\n',iters,mae_train,mae_test);
+    fprintf(maeF1, '%d %f %f\n',iters,mae_train,mae_test);
     
     % Approach 2 (using Monte Carlo averaging; but only using the
     % post-burnin samples of U and V)
     if iters > burnin
-        mae_train_avg = 10
-        mae_test_avg = 10     
+        U_avg = (U_avg*(iters-burnin-1) + U)/(iters-burnin);
+        V_avg = (V_avg*(iters-burnin-1) + V)/(iters-burnin);
+        
+        mae_train_avg = 0;
+        for i=1:round(0.8*num_nz)
+            mae_train_avg = mae_train_avg + abs(U_avg(I_train(i),:)*V_avg(J_train(i),:)' - vals_train(i));
+        end
+        mae_train_avg = mae_train_avg/round(0.8*num_nz);
+        
+        mae_test_avg = 0;
+        for i=1:round(0.2*num_nz)
+            mae_test_avg = mae_test_avg + abs(U_avg(I_test(i),:)*V_avg(J_test(i),:)' - vals_test(i));
+        end
+        mae_test_avg = mae_test_avg/round(0.2*num_nz);
+        
         fprintf('With Posterior Averaging, MAE_train_avg = %f, MAE_test_avg = %f\n',mae_train_avg,mae_test_avg);
+        fprintf(maeF2, '%d %f %f\n',iters, mae_train_avg,mae_test_avg);
     end
 end
+
+fclose(maeF1);
+fclose(maeF2);
 
 % Finally, let's print the K topics (top 20 words from each topic)
 % For this, you need to take the V matrix and finds the 20 largest entries in
 % each column of V. The function 'printtopics' already does it but if you
 % are implementing in some other language, you will have to write this
 % function by yourself, using the same logic)
+topicsF1 = fopen('topics_result.txt','w');
+printtopics(V,topicsF1);
+fclose(topicsF1);
 
-printtopics(V);
+topicsF2 = fopen('topics_result_avg.txt','w');
+printtopics(V_avg,topicsF2);
+fclose(topicsF2);

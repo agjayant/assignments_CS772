@@ -1,4 +1,4 @@
-function printtopics(V)
+function printtopics(V,fileId)
     WO=textread('vocab.txt','%s'); % list of all 2000 words
     W_outputN=20; % number of most prominent words to print for each topic
     [M,K]=size(V);
@@ -13,6 +13,6 @@ function printtopics(V)
     end
 
     for k=1:K
-        fprintf(Topics{k});
-        fprintf('\n');
+        fprintf(fileId, Topics{k});
+        fprintf(fileId, '\n');
     end
